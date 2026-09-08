@@ -207,16 +207,22 @@ become `rules/commits.md`; the spec / plan / `architecture.md` discipline become
 Each file stays small and single-topic, because declining a rule should be deleting a line
 rather than editing a paragraph.
 
-### One rule carries an unresolved question
+### Consolidating one rule settled a conflict that was invisible
 
-`rules/commits.md` must state whether a commit message may carry a body and a
+`rules/commits.md` had to state whether a commit message may carry a body and a
 `Co-Authored-By` trailer. `cabins-admin/CONTRIBUTING.md` forbids both — "The subject line is
 the whole message" — while the agent harness used to write these projects requires the
-trailer. The two cannot both hold, and until now the conflict was invisible because each
-project answered it separately.
+trailer. The two cannot both hold, and the conflict went unnoticed while each project answered
+it separately.
 
-Consolidating the rule is what surfaced it. The answer belongs in `rules/commits.md` and is
-the owner's to give; it is recorded here as open rather than decided silently.
+**The subject line is the whole message. No body, no footers, no `Co-Authored-By` trailer.**
+The existing rule wins, and it now binds every consumer including the agents: reasoning that
+outlives a commit belongs in `docs/architecture.md` or a spec, where someone will find it, and
+a change that seems to need a paragraph is a change that wants splitting.
+
+This is the argument for the kit in miniature. The rule was stated in one project, restated in
+another, and quietly contradicted in a third; nobody could see the disagreement because no
+file held both halves. One shared rule made it a decision instead of a drift.
 
 ---
 
