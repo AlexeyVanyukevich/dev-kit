@@ -15,18 +15,24 @@ This is the founding design record of this repository, written before any code o
 dev-kit is consumed and never consumes: no project here depends on a project that uses it, and
 a project that uses it depends on nothing else to do so.
 
+Throughout, **the older project** and **the newer project** are the two applications already
+running — the first being where most of these conventions were written down, the second where
+they were restated. **The unbuilt project** is a third, designed but not yet written. Their
+roles are what matters here; which repository is which is a fact about one machine and would
+only date this record.
+
 ---
 
 ## 1. Purpose
 
-Three repositories — `booking-engine`, `cabins-admin`, `vigil` — share one set of conventions
-and one set of tooling configuration, and today each carries its own copy.
+Three repositories share one set of conventions and one set of tooling configuration, and today
+each carries its own copy.
 
 The duplication is measurable. `.prettierrc` is byte-identical across the two built projects.
 `.gitignore` and `.prettierignore` express the same intent and have drifted apart (22 vs 14
-lines, 16 vs 12). `cabins-admin/CONTRIBUTING.md` opens by saying its conventions are "the same
-set as `../booking-engine`" and then restates them in prose, because there was no other way to
-have them. The third project has not been built yet and would have restated them a third time.
+lines, 16 vs 12). The newer project's `CONTRIBUTING.md` opens by saying its conventions are
+"the same set as the older one" and then restates them in prose, because there was no other way
+to have them. The third has not been built yet and would have restated them a third time.
 
 dev-kit holds one copy of each shared thing and lets a project take the pieces it wants.
 
@@ -86,7 +92,8 @@ registry**:
 ```
 package.json          name and exports map — the whole public surface
 rules/                markdown, imported by a consuming project's CLAUDE.md
-  typescript.md  http.md  layout.md  testing.md  commits.md  documentation.md
+  typescript.md  http.md  layout.md  testing.md
+  commits.md  documentation.md  writing.md
 tsconfig/
   base.json           strict, noUncheckedIndexedAccess, exactOptionalPropertyTypes, ES2023
   node.json           extends base — NodeNext, types: node
@@ -180,14 +187,14 @@ that file exists. Each project's `./run` therefore keeps a short inline bootstra
 bootstrap is shared: the colour handling, `step` / `ok` / `note` / `die`, `need_docker`,
 `need_node`, `load_env_file`, and the `check` scenario.
 
-The scenarios themselves stay in each project. `booking-engine`'s `run` is 511 lines and
-`cabins-admin`'s is 358 because they start different things; only the frame is common.
+The scenarios themselves stay in each project: one `run` is 511 lines and the other 358,
+because they start different things; only the frame is common.
 
 ---
 
 ## 5. What the rules contain, and what stays behind
 
-The rules are **extracted**, not copied. `booking-engine/docs/conventions.md` is titled
+The rules are **extracted**, not copied. The older project's `docs/conventions.md` is titled
 "Engine-wide conventions" and is exactly that: a mix of portable rules and engine domain
 knowledge.
 
@@ -197,12 +204,28 @@ knowledge.
 | Technology stack | `rules/typescript.md`, `rules/testing.md` |
 | Code layout | `rules/layout.md` |
 | Testing conventions | `rules/testing.md` |
-| Vocabulary, Time and date, Concurrency, Deliberate limitations | **stay in booking-engine** |
+| Vocabulary, Time and date, Concurrency, Deliberate limitations | **stay in the older project** |
 
-From `cabins-admin/CONTRIBUTING.md`: the TypeScript compiler settings and the NodeNext `.js`
-import rule join `rules/typescript.md`; Conventional Commits and the commit-splitting guidance
-become `rules/commits.md`; the spec / plan / `architecture.md` discipline becomes
+From the newer project's `CONTRIBUTING.md`: the TypeScript compiler settings and the NodeNext
+`.js` import rule join `rules/typescript.md`; Conventional Commits and the commit-splitting
+guidance become `rules/commits.md`; the spec / plan / `architecture.md` discipline becomes
 `rules/documentation.md`.
+
+### One rule is written, not extracted
+
+`rules/writing.md` has no source document. It states that a document refers to other projects,
+people and accounts by their **role** rather than their name, and names something only when the
+name is load-bearing — a package that must be installed, a file that must be opened, a command
+that must run.
+
+It was stated twice before it was written down. The unbuilt project's design record was edited
+on 2026-09-05 to replace four named sibling applications with "the reference application", and
+on 2026-09-08 the first draft of this spec was rejected for the same reason. A preference
+corrected twice is a convention nobody had written down, which is exactly what this repository
+is for.
+
+The rule governs names, not dates: this record is dated throughout on purpose, because a
+decision record is a statement about a moment.
 
 Each file stays small and single-topic, because declining a rule should be deleting a line
 rather than editing a paragraph.
@@ -210,10 +233,10 @@ rather than editing a paragraph.
 ### Consolidating one rule settled a conflict that was invisible
 
 `rules/commits.md` had to state whether a commit message may carry a body and a
-`Co-Authored-By` trailer. `cabins-admin/CONTRIBUTING.md` forbids both — "The subject line is
-the whole message" — while the agent harness used to write these projects requires the
-trailer. The two cannot both hold, and the conflict went unnoticed while each project answered
-it separately.
+`Co-Authored-By` trailer. The newer project's `CONTRIBUTING.md` forbids both — "The
+subject line is the whole message" — while the agent harness used to write these
+projects requires the trailer. The two cannot both hold, and the conflict went unnoticed
+while each project answered it separately.
 
 **The subject line is the whole message. No body, no footers, no `Co-Authored-By` trailer.**
 The existing rule wins, and it now binds every consumer including the agents: reasoning that
@@ -230,7 +253,7 @@ file held both halves. One shared rule made it a decision instead of a drift.
 
 Git tags, and a project pins one: `#v1`. Updating is a ref bump in one project at a time.
 
-`vigil` can move to `#v2` while `cabins-admin` stays on `#v1`, which matters because a
+The unbuilt project can move to `#v2` while the newer one stays on `#v1`, which matters because a
 convention change that is right for a new project is not automatically worth a sweep through
 an old one. Deliberate updates are the point, not a limitation: a shared configuration that
 changes underneath a project without being asked is how a shared configuration becomes
@@ -247,7 +270,7 @@ without restructuring anything, and a consuming project adds `extraKnownMarketpl
 `.claude/settings.json`. Building the manifest before there is anything to put in it would be
 scaffolding for its own sake.
 
-**`docker-compose.yml`.** 101 lines in `booking-engine`, 19 in `cabins-admin`. What they share
+**`docker-compose.yml`.** 101 lines in the older project, 19 in the newer. What they share
 is the idea of a Postgres service, which is not worth a module.
 
 **A project generator.** §2.
@@ -259,15 +282,14 @@ nobody uses is a guess about the future.
 
 ## 8. Consequences for the three existing projects
 
-`vigil` has not been built. Its implementation plan
-(`vigil/docs/superpowers/plans/2026-09-07-vigil-slice-1-errors-end-to-end.md`) has a first
+The unbuilt project has, by definition, not been built. Its implementation plan has a first
 task that hand-writes `tsconfig.base.json`, `.prettierrc`, the `run` script and a
 `CONTRIBUTING.md` restating conventions. Most of that becomes taking the dependency. **That
 plan needs revising once this repository exists** — a separate decision, recorded here so it
 is not forgotten.
 
-`cabins-admin` and `booking-engine` are running and are not migrated as part of building this.
-They adopt modules one at a time, when something in one of them is being changed anyway. The
+Both built projects are running, and neither is migrated as part of building this. They
+adopt modules one at a time, when something in one of them is being changed anyway. The
 kit is designed to make partial adoption normal: a project that takes only `rules/commits.md`
 and nothing else is using it correctly.
 
@@ -286,5 +308,5 @@ Small enough for one plan, in four steps, each independently checkable:
 4. **`README.md`, then tag `v1`.** The consumption contract from §4 is the whole interface, and
    the tag is what §6's pin refers to — until it exists no project can depend on this.
 
-The first consumer is whichever project is touched next. If that is `vigil`, step 4 is
+The first consumer is whichever project is touched next. If that is the unbuilt one, step 4 is
 followed by revising its Slice 1 plan per §8.
