@@ -157,7 +157,13 @@ dialog.
 import path — `@node_modules/@vanyukevich/dev-kit/rules/typescript.md` — which is unusual
 enough to be worth a probe rather than an assumption. A throwaway fixture with two sentinel
 strings, one behind a scoped path and one behind an unscoped path, was read back correctly in
-a print-mode session. Both resolve. The package keeps its scope.
+a print-mode session. Both resolve.
+
+The package keeps its scope, and dropping it was considered under the rule in `rules/writing.md`
+— an unscoped `dev-kit` would remove a personal name from every specifier. It was rejected
+because the same name is unavoidable in `github:<account>/dev-kit`, which npm needs verbatim to
+clone: dropping the scope would shorten the import while leaving the install line unchanged.
+A name a tool requires is load-bearing, which is exactly the exception that rule carves out.
 
 ### Rules are imported, not linked into `.claude/rules/`
 
