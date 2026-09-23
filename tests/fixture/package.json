@@ -5,5 +5,9 @@
   "description": "Not shipped. Proves the kit's contract by consuming it.",
   "dependencies": {
     "dev-kit": "file:../.."
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "@types/node": "^26.1.2"
   }
 }
