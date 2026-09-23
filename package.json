@@ -14,6 +14,7 @@
     "./package.json": "./package.json",
     "./tsconfig/base": "./tsconfig/base.json",
     "./tsconfig/node": "./tsconfig/node.json",
-    "./tsconfig/web": "./tsconfig/web.json"
+    "./tsconfig/web": "./tsconfig/web.json",
+    "./prettier": "./prettier/index.json"
   }
 }

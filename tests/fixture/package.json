@@ -3,11 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "description": "Not shipped. Proves the kit's contract by consuming it.",
+  "prettier": "dev-kit/prettier",
   "dependencies": {
     "dev-kit": "file:../.."
   },
   "devDependencies": {
     "typescript": "^7.0.2",
-    "@types/node": "^26.1.2"
+    "@types/node": "^26.1.2",
+    "prettier": "^3.9.6"
   }
 }
