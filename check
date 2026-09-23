@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+#
+# The whole verification suite. Each checks/*.sh proves one module's contract by running the
+# tool a consumer would run, against tests/fixture.
+#
+set -euo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")"
+
+if [ -t 1 ]; then
+  BOLD=$'\033[1m'; RED=$'\033[31m'; GREEN=$'\033[32m'; OFF=$'\033[0m'
+else
+  BOLD=''; RED=''; GREEN=''; OFF=''
+fi
+
+only="${1:-}"
+ran=0
+
+for script in checks/*.sh; do
+  [ -e "$script" ] || continue
+  name="$(basename "$script" .sh)"
+  if [ -n "$only" ] && [[ "$name" != *"$only"* ]]; then continue; fi
+
+  printf '%s→ %s%s\n' "$BOLD" "$name" "$OFF"
+  if ! bash "$script"; then
+    printf '%s✗ %s failed%s\n' "$RED" "$name" "$OFF" >&2
+    exit 1
+  fi
+  ran=$((ran + 1))
+done
+
+if [ "$ran" = 0 ]; then
+  printf '%s✗ no checks matched%s\n' "$RED" "$OFF" >&2
+  exit 1
+fi
+
+printf '%s✓ %d checks passed%s\n' "$GREEN" "$ran" "$OFF"

@@ -1,0 +1,9 @@
+{
+  "name": "dev-kit-fixture",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Not shipped. Proves the kit's contract by consuming it.",
+  "dependencies": {
+    "dev-kit": "file:../.."
+  }
+}
