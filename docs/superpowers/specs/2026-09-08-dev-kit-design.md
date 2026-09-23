@@ -237,6 +237,12 @@ the private one installs a stranger's package instead of failing. That is a wors
 a 404, and it is accepted for two reasons. The situation requires a consumer with no `.npmrc`
 and no git specifier, which no project here has; and the alternative does not actually fix it.
 
+There is one accidental benefit, noted but not relied upon: because the name belongs to
+somebody else upstream, an unthinking `npm publish` against the public registry cannot
+succeed. It fails with a 403 rather than putting these conventions on the open internet. A
+stranger's ownership is not an access control and the build plan configures the registry
+explicitly regardless, but the accident runs in the safe direction.
+
 A scope only protects a name if it is owned, and owning one means claiming it publicly — which
 §1 rules out. An *unclaimed* scope such as `@kit` reads as safe today and expires the moment
 somebody else claims it, at which point the same silent-wrong-package failure returns, later
