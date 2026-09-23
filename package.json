@@ -1,0 +1,20 @@
+{
+  "name": "dev-kit",
+  "version": "1.0.0",
+  "description": "Shared conventions and tooling configuration",
+  "license": "UNLICENSED",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexeyVanyukevich/dev-kit.git"
+  },
+  "engines": { "node": ">=24.0.0" },
+  "files": ["rules", "tsconfig", "prettier", "sh", "ignore"],
+  "exports": {
+    "./package.json": "./package.json",
+    "./tsconfig/base": "./tsconfig/base.json",
+    "./tsconfig/node": "./tsconfig/node.json",
+    "./tsconfig/web": "./tsconfig/web.json",
+    "./prettier": "./prettier/index.json"
+  }
+}

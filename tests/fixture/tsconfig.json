@@ -1,0 +1,5 @@
+{
+  "extends": "dev-kit/tsconfig/node",
+  "compilerOptions": { "noEmit": true },
+  "include": ["src/clean.ts"]
+}

@@ -1,0 +1,6 @@
+node_modules/
+.DS_Store
+
+# The fixture installs the kit into itself; the symlink npm creates is not source.
+tests/fixture/node_modules/
+tests/fixture/package-lock.json

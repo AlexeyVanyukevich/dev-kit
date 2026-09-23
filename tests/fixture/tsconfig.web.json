@@ -1,0 +1,4 @@
+{
+  "extends": "dev-kit/tsconfig/web",
+  "include": ["src/dom.ts"]
+}
