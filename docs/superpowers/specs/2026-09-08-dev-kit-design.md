@@ -1,6 +1,6 @@
 # dev-kit — shared conventions and configuration
 
-Status: **designed**, 2026-09-08. Not built.
+Status: **designed**, 2026-09-08. Amended 2026-09-23. Not built.
 
 > **This is a decision record, not a description of the system.**
 >
@@ -9,6 +9,17 @@ Status: **designed**, 2026-09-08. Not built.
 >
 > Read it to learn **why** something has the shape it does. For **what** the kit provides
 > today, read `README.md`.
+
+> **Amendment, 2026-09-23 — the package name and the distribution channel.**
+>
+> The package is `dev-kit`, unscoped, and a private registry is its preferred channel with git
+> as the fallback. This reverses two decisions taken on 2026-09-08 and recorded below: that the
+> package keeps a personal scope (§4), and that no registry is involved at all (§3).
+>
+> Both original arguments are left standing in the text, each followed by what overturned it.
+> Nothing here had been built when the amendment was made, so this is still a design being
+> settled rather than a system being described — but a reversal is worth more than the decision
+> it replaces, and deleting the first argument would leave the second looking obvious.
 
 This is the founding design record of this repository, written before any code on 2026-09-08.
 
@@ -57,6 +68,12 @@ definitions; a Claude Code plugin.
 
 Each is addressed in §7. None is precluded by anything below.
 
+### Never published publicly
+
+**The kit is never published to the public npm registry.** Not "not yet" — this is a
+constraint the design relies on rather than a step nobody has got round to. §3 spends the
+package's name on the strength of it, so the two have to be read together.
+
 ---
 
 ## 2. Why a repository rather than the alternatives
@@ -86,8 +103,8 @@ feature.
 
 ## 3. Shape
 
-One repository. One npm package, `@vanyukevich/dev-kit`, consumed **over git and never from a
-registry**:
+One repository. One npm package, `dev-kit`, consumed **from a private registry, or over git,
+and never from the public one**:
 
 ```
 package.json          name and exports map — the whole public surface
@@ -106,21 +123,39 @@ ignore/
 
 ### One package, not several
 
-The obvious reading of "split as much as possible" is a package per concern —
-`@vanyukevich/tsconfig`, `@vanyukevich/prettier-config`. That shape is foreclosed by consuming
-over git: a git dependency installs a **repository**, so several independent packages inside
-one repository cannot be depended on separately without publishing them separately, which is
-the registry this design is avoiding.
+The obvious reading of "split as much as possible" is a package per concern — `dev-tsconfig`,
+`dev-prettier-config`. That shape is foreclosed by the git fallback: a git dependency installs
+a **repository**, so several independent packages inside one repository cannot be depended on
+separately over git at all. Only the registry channel could carry them, and a module that
+exists on one channel and not the other is a module that breaks the moment a machine falls
+back.
 
 One package with subpath exports gives the same granularity. A project that wants only the
-Prettier configuration references only `@vanyukevich/dev-kit/prettier`; nothing else is
-loaded, extended, or imported. The unit of choice is the export, not the package.
+Prettier configuration references only `dev-kit/prettier`; nothing else is loaded, extended,
+or imported. The unit of choice is the export, not the package.
 
-### No registry
+### No public registry
 
-`"@vanyukevich/dev-kit": "github:AlexeyVanyukevich/dev-kit#v1"` installs on any machine that
-can reach GitHub, needs no npm account, no publish step and no release process, and pins to a
-git ref. For one author and three consumers, a registry would add ceremony and buy nothing.
+**Decided 2026-09-08.** `"dev-kit": "github:AlexeyVanyukevich/dev-kit#v1"` installs on any
+machine that can reach the remote, needs no npm account, no publish step and no release
+process, and pins to a git ref. For one author and three consumers, a registry would add
+ceremony and buy nothing.
+
+**Amended 2026-09-23.** A private registry is the preferred channel; the git specifier stays
+as the documented fallback. What the original argument missed is that "registry" was treated
+as one thing. A *public* registry would indeed buy nothing — it would cost an account, a
+publish step, a release process, and it would put three private projects' shared conventions
+on the open internet. A *private* one costs a service that is already worth running for other
+reasons and buys back the thing git specifiers cannot express: real semver ranges, so a
+consumer can say `^1.0.0` and take patch fixes without editing a ref.
+
+Both channels install the same package. A consumer that can reach the registry writes a
+version range and an `.npmrc` line; a consumer that cannot — a fresh machine, a CI runner
+outside the network — writes the git specifier and gets the same tree at a pinned tag. Neither
+is a migration away from the other.
+
+The public registry is not a third option, and §1 says why that is a constraint rather than an
+omission.
 
 ---
 
@@ -130,16 +165,34 @@ Every line below is independent and optional. A project writes only the ones it 
 
 | Module | How a project takes it |
 | ------ | ---------------------- |
-| the package | `"devDependencies": { "@vanyukevich/dev-kit": "github:AlexeyVanyukevich/dev-kit#v1" }` |
-| TypeScript | `"extends": "@vanyukevich/dev-kit/tsconfig/node"` in `tsconfig.json` |
-| Prettier | `"prettier": "@vanyukevich/dev-kit/prettier"` in `package.json` |
-| a rule | `@node_modules/@vanyukevich/dev-kit/rules/typescript.md` in `CLAUDE.md` |
-| the run skeleton | `source node_modules/@vanyukevich/dev-kit/sh/lib.sh` in `./run` |
+| the package | `"devDependencies": { "dev-kit": "^1.0.0" }`, plus `registry=` in `.npmrc` |
+| the package, over git | `"devDependencies": { "dev-kit": "github:AlexeyVanyukevich/dev-kit#v1" }`, no `.npmrc` |
+| TypeScript | `"extends": "dev-kit/tsconfig/node"` in `tsconfig.json` |
+| Prettier | `"prettier": "dev-kit/prettier"` in `package.json` |
+| a rule | `@node_modules/dev-kit/rules/typescript.md` in `CLAUDE.md` |
+| the run skeleton | `source node_modules/dev-kit/sh/lib.sh` in `./run` |
 | ignore files | copied once — see below |
 
-Four of the six use a mechanism the tool already has. That is deliberate: an installer script
+The first two rows are the same module through two channels; a project writes one of them.
+Every row below them is identical either way, which is the property that makes the fallback a
+fallback rather than a fork.
+
+Four of the seven use a mechanism the tool already has. That is deliberate: an installer script
 that copied files around would have to be written, documented, kept working, and given an
 update command, and every one of those is a thing that can rot.
+
+### The `.npmrc` line is the cost of an unscoped name
+
+A scoped package can be routed to a private registry by its scope alone —
+`@scope:registry=…` — leaving every other dependency on the public registry. An unscoped name
+has no such hook: npm routes by scope or not at all, so a consumer of `dev-kit` sets
+`registry=` for the whole project and every install it makes flows through the private
+registry.
+
+This is a smaller cost than it reads as, because a private registry worth running proxies the
+public one upstream, which is the arrangement such a registry is built for. It is recorded
+because it is the one place where the name below has a price, and the price is paid by every
+consumer rather than by this repository.
 
 ### Rules travel through npm because they cannot travel through a plugin
 
@@ -154,16 +207,46 @@ inside the working directory, so these are not "external" imports and raise no a
 dialog.
 
 **Verified before this design was accepted.** A scoped package puts an `@` in the middle of an
-import path — `@node_modules/@vanyukevich/dev-kit/rules/typescript.md` — which is unusual
-enough to be worth a probe rather than an assumption. A throwaway fixture with two sentinel
-strings, one behind a scoped path and one behind an unscoped path, was read back correctly in
-a print-mode session. Both resolve.
+import path — `@node_modules/@scope/dev-kit/rules/typescript.md` — which is unusual enough to
+be worth a probe rather than an assumption. A throwaway fixture with two sentinel strings, one
+behind a scoped path and one behind an unscoped path, was read back correctly in a print-mode
+session. Both resolve. The amendment below takes the unscoped path, so the probe now decides
+nothing; it is kept because it is the reason nobody has to re-run it if a scope ever returns.
 
-The package keeps its scope, and dropping it was considered under the rule in `rules/writing.md`
-— an unscoped `dev-kit` would remove a personal name from every specifier. It was rejected
-because the same name is unavoidable in `github:<account>/dev-kit`, which npm needs verbatim to
-clone: dropping the scope would shorten the import while leaving the install line unchanged.
-A name a tool requires is load-bearing, which is exactly the exception that rule carves out.
+### The package name
+
+**Decided 2026-09-08.** The package keeps a personal scope, `@vanyukevich/dev-kit`. Dropping
+it was considered under the rule in `rules/writing.md` — an unscoped `dev-kit` would remove a
+personal name from every specifier — and rejected because the same name is unavoidable in
+`github:<account>/dev-kit`, which npm needs verbatim to clone: dropping the scope would
+shorten the import while leaving the install line unchanged. A name a tool requires is
+load-bearing, which is exactly the exception that rule carves out.
+
+**Amended 2026-09-23. The package is `dev-kit`, unscoped.** The argument above depended on
+the git specifier being the only way in. Once a private registry is the preferred channel,
+the install line is `"dev-kit": "^1.0.0"` and carries no URL, so the account name is no longer
+unavoidable — it survives only in the fallback row of §4's table. The exception in
+`rules/writing.md` stops applying the moment the name stops being required, and what is left
+is a personal name in every import path of three projects, which is what that rule exists to
+remove.
+
+**The name is taken on the public registry, and that is accepted.** `dev-kit` resolves there
+to an abandoned Angular 2 package, last published at `1.0.0-beta2`. The consequence is
+specific: a machine that runs `npm install dev-kit` *by name* against a registry that is not
+the private one installs a stranger's package instead of failing. That is a worse failure than
+a 404, and it is accepted for two reasons. The situation requires a consumer with no `.npmrc`
+and no git specifier, which no project here has; and the alternative does not actually fix it.
+
+A scope only protects a name if it is owned, and owning one means claiming it publicly — which
+§1 rules out. An *unclaimed* scope such as `@kit` reads as safe today and expires the moment
+somebody else claims it, at which point the same silent-wrong-package failure returns, later
+and harder to spot. A guarantee that can be revoked by a stranger is not a guarantee, and
+paying for it in every specifier is paying twice.
+
+**The signal to revisit** is a consumer outside this author's control — a contractor's laptop,
+a shared runner, anything where the `.npmrc` is not guaranteed. At that point buy the name
+properly by claiming a scope, and change `package.json`, the `.npmrc` line and the `extends`
+strings. Nothing else in the kit depends on the name.
 
 ### Rules are imported, not linked into `.claude/rules/`
 
@@ -257,13 +340,26 @@ file held both halves. One shared rule made it a decision instead of a drift.
 
 ## 6. Versioning
 
-Git tags, and a project pins one: `#v1`. Updating is a ref bump in one project at a time.
+One version number, in `package.json`, expressed twice: a registry consumer writes a semver
+range, a git consumer pins the tag cut from the same commit. Every release is both published
+and tagged, or the two channels drift and the fallback stops being equivalent.
 
-The unbuilt project can move to `#v2` while the newer one stays on `#v1`, which matters because a
-convention change that is right for a new project is not automatically worth a sweep through
-an old one. Deliberate updates are the point, not a limitation: a shared configuration that
-changes underneath a project without being asked is how a shared configuration becomes
-something people stop trusting.
+**Decided 2026-09-08, and still standing.** A project pins `#v1` and updating is a ref bump in
+one project at a time. The unbuilt project can move to `#v2` while the newer one stays on
+`#v1`, which matters because a convention change that is right for a new project is not
+automatically worth a sweep through an old one. Deliberate updates are the point, not a
+limitation: a shared configuration that changes underneath a project without being asked is
+how a shared configuration becomes something people stop trusting.
+
+**What the registry changes, 2026-09-23.** A range such as `^1.0.0` does let patch and minor
+releases arrive without being asked, which is the thing the paragraph above argues against.
+The two are reconciled by what a version number is allowed to mean here: a convention change
+that a project might reasonably decline is a **major** version, however small the diff. Fixing
+a typo in a rule is a patch; changing what the rule requires is a major. Majors are what the
+paragraph above is protecting, and a range never crosses one.
+
+A project that wants none of this writes an exact version or the git tag and takes nothing it
+did not ask for.
 
 ---
 
@@ -312,7 +408,9 @@ Small enough for one plan, in four steps, each independently checkable:
 3. **`sh/lib.sh`.** Extracted from the two existing `run` scripts, with the bootstrap pattern
    documented. Checkable by pointing one existing project's `./run` at it.
 4. **`README.md`, then tag `v1`.** The consumption contract from §4 is the whole interface, and
-   the tag is what §6's pin refers to — until it exists no project can depend on this.
+   the tag is what §6's pin refers to — until it exists no project can depend on this. The
+   registry channel is documented in the same step but need not be exercised until a registry
+   exists; §6 requires only that a release which *is* published is tagged from the same commit.
 
 The first consumer is whichever project is touched next. If that is the unbuilt one, step 4 is
 followed by revising its Slice 1 plan per §8.
