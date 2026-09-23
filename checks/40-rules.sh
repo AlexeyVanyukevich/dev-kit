@@ -18,7 +18,7 @@ while read -r path; do
   imports=$((imports + 1))
 done < <(grep -o '^@node_modules/[^ ]*\.md' CLAUDE.md | sed 's/^@//')
 
-[ "$imports" = 7 ] || { echo "  ✗ expected 7 rule imports, found $imports"; exit 1; }
+[ "$imports" = 8 ] || { echo "  ✗ expected 8 rule imports, found $imports"; exit 1; }
 
 # The whole-set budget encodes spec §4's decision: past roughly 200 lines, adherence suffers
 # and the path-scopable rules should move to .claude/rules/. Crossing it is a design signal,
@@ -43,4 +43,4 @@ else
   echo "  · session check skipped (no claude CLI, or DEVKIT_SKIP_SESSION_CHECK set)"
 fi
 
-echo "  ✓ 7 rules reachable, $total lines total, all within budget"
+echo "  ✓ $imports rules reachable, $total lines total, all within budget"

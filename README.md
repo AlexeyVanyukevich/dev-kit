@@ -75,6 +75,7 @@ wants:
 @node_modules/dev-kit/rules/commits.md
 @node_modules/dev-kit/rules/documentation.md
 @node_modules/dev-kit/rules/writing.md
+@node_modules/dev-kit/rules/review.md
 ```
 
 | Rule | Covers |
@@ -86,6 +87,7 @@ wants:
 | `commits.md` | Conventional Commits, and the subject line being the whole message |
 | `documentation.md` | `architecture.md` is authoritative; specs and plans are dated records |
 | `writing.md` | Refer to projects by role; name something only when the name is load-bearing |
+| `review.md` | A session ends by showing everything it changed, and what it decided alone |
 
 These are **filesystem paths, not module specifiers**. They never touch npm's resolver, which
 is why they appear in no `exports` map and why adding a rule needs no `package.json` change.
