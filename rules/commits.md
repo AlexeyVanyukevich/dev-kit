@@ -31,3 +31,9 @@ Each commit leaves the repository compiling and tells one story. Move bottom-up 
 dependency graph — schema, then service, then HTTP — so no commit references a module that does
 not exist yet. Keep a module's tests in the commit that adds the module. Keep unrelated changes
 apart: a dependency bump and a bug fix are two commits.
+
+**Merge by rebase — never squash, never a merge commit.** A squash folds commits that each tell
+one story into one, and both write a subject this rule forbids. `main` is the only long-lived
+branch and always passes. Work on a short-lived `<type>/<slug>` branch, typed as above, and keep
+it current by rebasing onto `main`, not by merging `main` in. A release is a `vX.Y.Z` tag on
+`main`, not a branch.

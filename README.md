@@ -84,7 +84,7 @@ wants:
 | `http.md` | The one error shape, its codes, `additionalProperties: false`, 4xx translation |
 | `layout.md` | `modules/<entity>/` and its four files; `shared/`, `db/`, where tests live |
 | `testing.md` | Tests first, real Postgres over mocks, datasets over test bodies, derived facts |
-| `commits.md` | Conventional Commits, and the subject line being the whole message |
+| `commits.md` | Conventional Commits, the subject line as the whole message, rebase-only merges |
 | `documentation.md` | `architecture.md` is authoritative; specs and plans are dated records |
 | `writing.md` | Refer to projects by role; name something only when the name is load-bearing |
 | `review.md` | A session ends by showing everything it changed, and what it decided alone |
