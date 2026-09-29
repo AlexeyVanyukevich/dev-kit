@@ -10,3 +10,4 @@ Imports every rule, so the check proves each one is reachable at the path the RE
 @node_modules/dev-kit/rules/documentation.md
 @node_modules/dev-kit/rules/writing.md
 @node_modules/dev-kit/rules/review.md
+@node_modules/dev-kit/rules/backlog.md

@@ -76,6 +76,7 @@ wants:
 @node_modules/dev-kit/rules/documentation.md
 @node_modules/dev-kit/rules/writing.md
 @node_modules/dev-kit/rules/review.md
+@node_modules/dev-kit/rules/backlog.md
 ```
 
 | Rule | Covers |
@@ -88,6 +89,7 @@ wants:
 | `documentation.md` | `architecture.md` is authoritative; specs and plans are dated records |
 | `writing.md` | Refer to projects by role; name something only when the name is load-bearing |
 | `review.md` | A session ends by showing everything it changed, and what it decided alone |
+| `backlog.md` | Findings left unfixed go in `docs/backlog.md`, one entry each, deleted by the fix |
 
 These are **filesystem paths, not module specifiers**. They never touch npm's resolver, which
 is why they appear in no `exports` map and why adding a rule needs no `package.json` change.
