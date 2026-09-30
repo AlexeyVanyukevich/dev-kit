@@ -104,16 +104,19 @@ Defines `step`, `ok`, `note`, `die`, `load_env_file`, `need_docker`, `need_node`
 and `need_env`, plus the colour variables. Sourcing is inert: no shell options set, no
 directory changed, nothing run.
 
-**`./run` is what installs dependencies, so it cannot source out of `node_modules` before that
-directory exists.** Keep a short bootstrap *above* the `source` line:
+**`./run` is what installs dependencies, so it cannot source out of `node_modules` before the
+kit is there.** Keep a short bootstrap *above* the `source` line, and test for the file rather
+than the directory: a checkout installed before it took the kit has `node_modules` without it.
 
 ```bash
-[ -d node_modules ] || npm install
+[ -f node_modules/dev-kit/sh/lib.sh ] || npm install
 source node_modules/dev-kit/sh/lib.sh
 ```
 
 `need_node` reads `DEVKIT_NODE_MIN` (default `24`) and `DEVKIT_NODE_HINT`. `need_env` returns
 non-zero when it created `.env`, so a caller can print its own notes only on the first run.
+**Under `set -e` a bare `need_env` therefore ends the script on exactly that run** — call it as
+`need_env || note "…"`.
 
 The scenarios stay in each project. Only the frame is shared.
 
