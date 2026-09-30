@@ -47,4 +47,12 @@ result="$(
 ( cd "$tmp" && rm -f .env && source "$lib" && load_env_file ) ||
   { echo "  ✗ load_env_file failed when .env was absent"; exit 1; }
 
-echo "  ✓ lib.sh sources inertly, defines its surface, and keeps env precedence"
+# need_env reports a created .env by returning non-zero, which the README tells a caller under
+# `set -e` to catch. The contract is both halves: non-zero when it copied, zero when it did not.
+( cd "$tmp" && rm -f .env && echo 'A=1' > .env.example && source "$lib" && need_env ) >/dev/null &&
+  { echo "  ✗ need_env returned zero after creating .env"; exit 1; }
+[ -f "$tmp/.env" ] || { echo "  ✗ need_env did not create .env"; exit 1; }
+( cd "$tmp" && source "$lib" && need_env ) >/dev/null ||
+  { echo "  ✗ need_env returned non-zero when .env already existed"; exit 1; }
+
+echo "  ✓ lib.sh sources inertly, defines its surface, keeps env precedence, and reports a new .env"
