@@ -8,6 +8,11 @@ set -euo pipefail
 # the README's last section: everything from its heading down is dropped.
 promised="$(sed '/^## Migrating from 1\.x/,$d' README.md)"
 
+# A 1.x path anywhere else is a dead line handed to whoever copies the example. The loops below
+# only see 2.0 shapes, so without this an old specifier would pass unexamined.
+stale="$(grep -nE 'dev-kit/(tsconfig|prettier|rules|sh|ignore)([^a-z]|$)' <<< "$promised" || true)"
+[ -z "$stale" ] || { echo "  ✗ the README still shows 1.x paths:"; echo "$stale"; exit 1; }
+
 checked=0
 
 # Filesystem paths — rule imports, the shell library, the ignore files. Each never touches npm's
