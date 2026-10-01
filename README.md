@@ -64,32 +64,38 @@ In the consuming project's `package.json`:
 
 ### Rules
 
-One line per rule in the consuming project's `CLAUDE.md`, and only the rules that project
-wants:
+One line per section in the consuming project's `CLAUDE.md`, and only the sections that
+project needs:
 
 ```markdown
-@node_modules/dev-kit/rules/typescript.md
-@node_modules/dev-kit/rules/http.md
-@node_modules/dev-kit/rules/layout.md
-@node_modules/dev-kit/rules/testing.md
-@node_modules/dev-kit/rules/commits.md
-@node_modules/dev-kit/rules/documentation.md
-@node_modules/dev-kit/rules/writing.md
-@node_modules/dev-kit/rules/review.md
-@node_modules/dev-kit/rules/backlog.md
+@node_modules/dev-kit/common/rules.md
+@node_modules/dev-kit/backend/rules.md
+@node_modules/dev-kit/ui/rules.md
+@node_modules/dev-kit/testing/rules.md
 ```
 
-| Rule | Covers |
-| ---- | ------ |
-| `typescript.md` | Compiler strictness, no `any`, NodeNext's `.js` imports, the `typebox` package |
-| `http.md` | The one error shape, its codes, `additionalProperties: false`, 4xx translation |
-| `layout.md` | `modules/<entity>/` and its four files; `shared/`, `db/`, where tests live |
-| `testing.md` | Tests first, real Postgres over mocks, datasets over test bodies, derived facts |
-| `commits.md` | Conventional Commits, the subject line as the whole message, rebase-only merges |
-| `documentation.md` | `architecture.md` is authoritative; specs and plans are dated records |
-| `writing.md` | Refer to projects by role; name something only when the name is load-bearing |
-| `review.md` | A session ends by showing everything it changed, and what it decided alone |
-| `backlog.md` | Findings left unfixed go in `docs/backlog.md`, one entry each, deleted by the fix |
+| Section | Rule | Covers |
+| ------- | ---- | ------ |
+| common | `typescript.md` | Compiler strictness, no `any` in hand-written code |
+| common | `commits.md` | Conventional Commits, the subject line as the whole message, rebase-only merges |
+| common | `documentation.md` | `architecture.md` is authoritative; specs and plans are dated records |
+| common | `writing.md` | Refer to projects by role; name something only when the name is load-bearing |
+| common | `review.md` | A session ends by showing everything it changed, and what it decided alone |
+| common | `backlog.md` | Findings left unfixed go in `docs/backlog.md`, one entry each, deleted by the fix |
+| backend | `typescript.md` | NodeNext's `.js` imports, the `typebox` package, the one accepted `any` |
+| backend | `http.md` | The one error shape, its codes, `additionalProperties: false`, 4xx translation |
+| backend | `layout.md` | `modules/<entity>/` and its four files; `shared/`, `db/` |
+| backend | `database-tests.md` | Integration tests against a real PostgreSQL, started by Testcontainers |
+| ui | `typescript.md` | Bundler resolution: no extension on relative imports |
+| testing | `testing.md` | Tests first, datasets over test bodies, derived facts, where tests live |
+
+A section's `rules.md` is a heading and one `@rules/<rule>.md` line per file in its `rules/`.
+No section imports another, so a project gets exactly the sections it names.
+
+**The kit must be installed as a real directory** — from the registry or over git, as above.
+`npm link` and a `file:` dependency install a symlink, and Claude Code does not follow an
+index's imports through a symlink that leads out of the project: the session reads the section
+headings and none of the rules.
 
 These are **filesystem paths, not module specifiers**. They never touch npm's resolver, which
 is why they appear in no `exports` map and why adding a rule needs no `package.json` change.
@@ -146,3 +152,7 @@ consumer project that installs this package by relative path.
 
 Write the check first. It is the only test this repository has, and a module that ships without
 one is a promise nobody is keeping.
+
+A rule goes in the `rules/` of the section whose every project needs it, with its import in
+that section's `rules.md`. `./check 40` fails until both exist, and fails if the section's
+session load passes 225 lines.

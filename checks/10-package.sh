@@ -29,6 +29,12 @@ stale="$(grep -rnE 'dev-kit/(tsconfig|prettier|rules|sh|ignore)([^a-z]|$)' \
   common backend ui testing 2>/dev/null || true)"
 [ -z "$stale" ] || { echo "  ✗ shipped files still name 1.x paths:"; echo "$stale"; exit 1; }
 
+# Only the four sections ship, plus what npm always adds. A 1.x directory left in `files`
+# would ship a second, stale copy of a rule.
+outside="$(grep -vE '^(common|backend|ui|testing)/|^package\.json$|^README\.md$' \
+  <<< "$packed" || true)"
+[ -z "$outside" ] || { echo "  ✗ the package ships files outside the sections:"; echo "$outside"; exit 1; }
+
 # A consumer must be able to resolve the package by name. This is what every later module
 # rides on, so it is checked once here rather than in each of them.
 ( cd "$fixture" && npm install --silent --no-audit --no-fund )
