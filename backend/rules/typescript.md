@@ -12,4 +12,4 @@ breaks a build that type-checked a moment earlier.
 `@fastify/type-provider-typebox`. The two publish similar APIs under different names, and
 installing the wrong one produces type errors that read as though the schema is at fault.
 
-**The one accepted `any` is `Kysely<any>`,** which Kysely's migration API requires.
+**The one accepted `any` is `Kysely<any>`, and only in a migration,** where Kysely's API demands it.
