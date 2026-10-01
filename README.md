@@ -53,6 +53,17 @@ Load `common` and `testing` in the root `CLAUDE.md`, `backend` in the server wor
 `CLAUDE.md`, and `ui` in the web workspace's. Claude Code reads a subdirectory's `CLAUDE.md`
 when it works on files there, so each workspace gets its own section and not the other's.
 
+**An import is relative to the `CLAUDE.md` that holds it,** and a workspace manager hoists the
+kit to the root `node_modules`. A workspace one level down therefore imports one level up —
+written as `@node_modules/…` it loads nothing, and says nothing:
+
+```markdown
+@../node_modules/dev-kit/backend/rules.md
+```
+
+Start sessions at the repository root. A session started inside a workspace treats the root's
+`node_modules` as outside the project and does not follow the import at all.
+
 Loading all four at the root is the obvious move and the wrong one: every session would read
 both, and the rules budget assumes no session does.
 
