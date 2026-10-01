@@ -41,13 +41,13 @@ it otherwise.
 ### TypeScript
 
 ```json
-{ "extends": "dev-kit/tsconfig/node" }
+{ "extends": "dev-kit/backend/tsconfig" }
 ```
 
-`dev-kit/tsconfig/base` carries the strictness: `strict`, `noUncheckedIndexedAccess`,
-`exactOptionalPropertyTypes`, `target: ES2023`. `dev-kit/tsconfig/node` adds NodeNext
-resolution and Node types; `dev-kit/tsconfig/web` adds the DOM lib, bundler resolution and
-`jsx: react-jsx`.
+`dev-kit/common/tsconfig` carries the strictness: `strict`, `noUncheckedIndexedAccess`,
+`exactOptionalPropertyTypes`, `target: ES2023`. `dev-kit/backend/tsconfig` adds NodeNext
+resolution and Node types; `dev-kit/ui/tsconfig` adds the DOM lib, bundler resolution and
+`jsx: react-jsx`. A workspace that is neither extends `dev-kit/common/tsconfig` directly.
 
 None of the three sets `outDir`, `rootDir` or `include`. Those describe one project's directory
 layout, and a shared base that guesses them is a base every project has to override.

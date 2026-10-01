@@ -5,10 +5,13 @@ set -euo pipefail
 cd tests/fixture
 npm install --silent --no-audit --no-fund
 
-# 1. The clean sources compile. This is what proves `extends` resolved at all: an unresolved
-#    extends is a hard tsc error, not a silent fallback to defaults.
+# 1. The clean sources compile under the backend base, and under the common base alone for a
+#    workspace that is neither backend nor ui. This is what proves `extends` resolved at all:
+#    an unresolved extends is a hard tsc error, not a silent fallback to defaults.
 npx tsc --noEmit -p tsconfig.json ||
-  { echo "  ✗ clean.ts did not compile under tsconfig/node"; exit 1; }
+  { echo "  ✗ clean.ts did not compile under backend/tsconfig"; exit 1; }
+npx tsc --noEmit -p tsconfig.common.json ||
+  { echo "  ✗ clean.ts did not compile under common/tsconfig"; exit 1; }
 
 # 2. The violations do not. Asserting on codes rather than on prose keeps this working when
 #    the compiler rewords a message.
@@ -22,12 +25,12 @@ for code in TS2322 TS2375; do
   }
 done
 
-# 3. The web base carries the DOM lib. Under tsconfig/node this file must NOT compile, which
-#    is what stops a Node project silently believing it has a `document`.
+# 3. The ui base carries the DOM lib. Without it this file must NOT compile, which is what
+#    stops a Node project silently believing it has a `document`.
 npx tsc --noEmit -p tsconfig.web.json ||
-  { echo "  ✗ dom.ts did not compile under tsconfig/web"; exit 1; }
+  { echo "  ✗ dom.ts did not compile under ui/tsconfig"; exit 1; }
 
 npx tsc --noEmit --strict --types node --lib ES2023 src/dom.ts >/dev/null 2>&1 &&
-  { echo "  ✗ dom.ts compiled without the DOM lib; the web base is not what makes it work"; exit 1; }
+  { echo "  ✗ dom.ts compiled without the DOM lib; the ui base is not what makes it work"; exit 1; }
 
-echo "  ✓ base, node and web resolve by specifier; strictness and the DOM lib are real"
+echo "  ✓ common, backend and ui resolve by specifier; strictness and the DOM lib are real"

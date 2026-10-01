@@ -1,7 +1,7 @@
 # TypeScript
 
 `strict: true`, plus `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`. Extend
-`dev-kit/tsconfig/node` or `.../web` rather than restating them.
+`dev-kit/backend/tsconfig` or `dev-kit/ui/tsconfig` rather than restating them.
 
 **No `any` in hand-written code.** The one accepted occurrence is the `Kysely<any>` signature
 Kysely's migration API requires; a migration is the only place it appears.
