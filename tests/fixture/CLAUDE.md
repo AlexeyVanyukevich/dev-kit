@@ -1,13 +1,9 @@
 # dev-kit fixture
 
-Imports every rule, so the check proves each one is reachable at the path the README promises.
+Imports every section, so the check proves each index is reachable at the path the README
+promises. A real project imports only the sections it needs.
 
-@node_modules/dev-kit/rules/typescript.md
-@node_modules/dev-kit/rules/http.md
-@node_modules/dev-kit/rules/layout.md
-@node_modules/dev-kit/rules/testing.md
-@node_modules/dev-kit/rules/commits.md
-@node_modules/dev-kit/rules/documentation.md
-@node_modules/dev-kit/rules/writing.md
-@node_modules/dev-kit/rules/review.md
-@node_modules/dev-kit/rules/backlog.md
+@node_modules/dev-kit/common/rules.md
+@node_modules/dev-kit/backend/rules.md
+@node_modules/dev-kit/ui/rules.md
+@node_modules/dev-kit/testing/rules.md

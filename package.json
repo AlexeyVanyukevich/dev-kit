@@ -15,7 +15,7 @@
     "common",
     "backend",
     "ui",
-    "rules"
+    "testing"
   ],
   "exports": {
     "./package.json": "./package.json",

@@ -19,5 +19,4 @@ values — it is then testable without a database, which is the whole point.
 **A pure computational core must not import from `db/`.** A `grep` for `db/` in such a file
 comes back empty, and that is the test.
 
-Cross-cutting helpers live in `src/shared/`, database wiring in `src/db/`, entry points at
-`src/`. Tests are `tests/{unit,integration}/`, and browser journeys `tests/ui/`.
+Cross-cutting helpers live in `src/shared/`, database wiring in `src/db/`, entry points at `src/`.
