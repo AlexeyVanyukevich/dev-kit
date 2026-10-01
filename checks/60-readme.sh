@@ -6,12 +6,13 @@ set -euo pipefail
 
 checked=0
 
-# Rule imports are filesystem paths; strip the leading @ and the node_modules/<pkg>/ prefix.
+# Filesystem paths — rule imports, the shell library, the ignore files. Each never touches npm's
+# resolver, so the only promise is that the file is there: strip node_modules/dev-kit/ and look.
 while read -r path; do
-  rel="${path#@node_modules/dev-kit/}"
+  rel="${path#node_modules/dev-kit/}"
   [ -f "$rel" ] || { echo "  ✗ README promises $path; $rel does not exist"; exit 1; }
   checked=$((checked + 1))
-done < <(grep -o '@node_modules/dev-kit/[^ )`]*' README.md | sort -u)
+done < <(grep -o 'node_modules/dev-kit/[^ )`"]*' README.md | sort -u)
 
 # Specifiers that go through module resolution must be in the exports map.
 while read -r spec; do
@@ -26,13 +27,7 @@ while read -r spec; do
     }
   "
   checked=$((checked + 1))
-done < <(grep -o 'dev-kit/\(tsconfig\|prettier\)[^ )`"]*' README.md | sort -u)
-
-# The one shell path.
-grep -q 'node_modules/dev-kit/sh/lib.sh' README.md && {
-  [ -f sh/lib.sh ] || { echo "  ✗ README promises sh/lib.sh, which does not exist"; exit 1; }
-  checked=$((checked + 1))
-}
+done < <(grep -o 'dev-kit/\(common/\|backend/\|ui/\)\{0,1\}\(tsconfig\|prettier\)[^ )`"]*' README.md | sort -u)
 
 [ "$checked" -ge 8 ] || { echo "  ✗ only $checked paths checked; the README looks incomplete"; exit 1; }
 

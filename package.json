@@ -12,17 +12,19 @@
     "node": ">=24.0.0"
   },
   "files": [
+    "common",
+    "backend",
+    "ui",
     "rules",
-    "tsconfig",
     "prettier",
     "sh",
     "ignore"
   ],
   "exports": {
     "./package.json": "./package.json",
-    "./tsconfig/base": "./tsconfig/base.json",
-    "./tsconfig/node": "./tsconfig/node.json",
-    "./tsconfig/web": "./tsconfig/web.json",
+    "./common/tsconfig": "./common/tsconfig.json",
+    "./backend/tsconfig": "./backend/tsconfig.json",
+    "./ui/tsconfig": "./ui/tsconfig.json",
     "./prettier": "./prettier/index.json"
   }
 }

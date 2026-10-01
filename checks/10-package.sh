@@ -17,6 +17,13 @@ expect_packed() {
 
 expect_packed 'package.json'
 
+# Every file in a section ships. A file left out of `files` still arrives over git, which
+# installs the whole repository, and is missing only from the registry tarball — the one
+# difference between the two channels that nothing else would catch.
+while read -r file; do
+  expect_packed "$file"
+done < <(find common backend ui testing -type f 2>/dev/null | sort)
+
 # A consumer must be able to resolve the package by name. This is what every later module
 # rides on, so it is checked once here rather than in each of them.
 ( cd "$fixture" && npm install --silent --no-audit --no-fund )

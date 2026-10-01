@@ -1,4 +1,4 @@
 {
-  "extends": "dev-kit/tsconfig/web",
+  "extends": "dev-kit/ui/tsconfig",
   "include": ["src/dom.ts"]
 }
