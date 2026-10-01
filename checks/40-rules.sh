@@ -66,8 +66,18 @@ within_budget() {
 backend_load="$(within_budget backend "$backend")"
 ui_load="$(within_budget ui "$ui")"
 
-# The end-to-end proof: a real session reads a rule back. The TypeBox rule sits two imports deep
-# in backend, so this also proves a nested relative import resolves through a real install.
+# The end-to-end proof: a real session reads a rule back. It asks for a fact that lives in one
+# rule file only, two imports deep in backend, and that no session could guess — so the answer
+# proves that file loaded, not merely that some nested import did. Kept true by the guard below,
+# which runs even when the session is skipped.
+fact='forbidden_origin'
+holders="$( { grep -rlF "$fact" "$kit"/*/rules || true; } | wc -l | tr -d ' ')"
+[ "$holders" = 1 ] || {
+  echo "  ✗ the session check's fact, $fact, must live in exactly one rule; found $holders."
+  echo "    Pick a fact that does, or the check stops proving which file loaded."
+  exit 1
+}
+
 # Skipped where the CLI is absent, because a check that cannot run everywhere must not be the
 # only thing standing behind a claim — the path assertions above hold on their own.
 #
@@ -83,8 +93,9 @@ if [ -z "${DEVKIT_SKIP_SESSION_CHECK:-}" ] && command -v claude >/dev/null 2>&1;
   tar -xzf "$consumer/$tarball" -C "$consumer/node_modules/dev-kit" --strip-components 1
   cp CLAUDE.md "$consumer/CLAUDE.md"
   git -C "$consumer" init -q
-  answer="$(cd "$consumer" && claude -p 'Which package does the TypeScript rule in your instructions say to use for schemas? Answer with the package name and nothing else.' 2>&1 || true)"
-  grep -q 'typebox' <<< "$answer" || {
+  answer="$(cd "$consumer" && claude -p 'Per the HTTP rule in your instructions, which error code answers a write whose Origin is not the app'"'"'s own? Answer with the code and nothing else.' 2>&1 || true)"
+  # The code alone, backticks allowed: a session that talks around it has not read it.
+  tr -d '`' <<< "$answer" | grep -qx "$fact" || {
     echo "  ✗ a session did not read the imported rule back. Got: $answer"
     exit 1
   }
