@@ -1,7 +1,8 @@
 # dev-kit
 
-Shared conventions and tooling configuration for the projects on this machine. A project takes
-the pieces it wants, one module at a time, and nothing else comes with them.
+Shared conventions and tooling configuration for the projects on this machine, in four
+sections — `common`, `backend`, `ui`, `testing`. A project loads the sections it needs, and
+nothing from the others comes with them.
 
 This is never published to the public npm registry. A package called `dev-kit` on the public
 registry is an unrelated project and is not this one.
@@ -11,7 +12,7 @@ registry is an unrelated project and is not this one.
 From the private registry — the normal way:
 
 ```json
-"devDependencies": { "dev-kit": "^1.0.0" }
+"devDependencies": { "dev-kit": "^2.0.0" }
 ```
 
 with the registry in the consuming project's `.npmrc`:
@@ -27,16 +28,35 @@ one upstream is built for.
 Over git — the fallback, for a machine that cannot reach the registry:
 
 ```json
-"devDependencies": { "dev-kit": "github:AlexeyVanyukevich/dev-kit#v1.0.0" }
+"devDependencies": { "dev-kit": "github:AlexeyVanyukevich/dev-kit#v2.0.0" }
 ```
 
 No `.npmrc` is needed for this form, and it installs the same tree at a pinned tag.
 
-## The modules
+## Sections
 
-Every module below is **independent and optional**. Take one line or all six. A project that
-takes only `rules/commits.md` and nothing else is using this correctly, and nothing will warn
-it otherwise.
+| Section | For | Brings |
+| ------- | --- | ------ |
+| `common` | every project | six rules, the TypeScript base, Prettier, the `./run` skeleton, ignore files |
+| `backend` | Node services | four rules, the NodeNext tsconfig |
+| `ui` | bundled browser applications | one rule, the browser tsconfig |
+| `testing` | any project with a test suite | one rule |
+
+**No section loads another.** A backend project with tests writes `common`, `backend` and
+`testing` as three lines; nothing arrives that it did not name. A section's rules come as one
+line; its configuration — tsconfig, Prettier, `./run`, ignore files — is still taken one piece
+at a time, and a project that wants none of it writes none of it.
+
+### A repository with both a backend and a UI
+
+Load `common` and `testing` in the root `CLAUDE.md`, `backend` in the server workspace's
+`CLAUDE.md`, and `ui` in the web workspace's. Claude Code reads a subdirectory's `CLAUDE.md`
+when it works on files there, so each workspace gets its own section and not the other's.
+
+Loading all four at the root is the obvious move and the wrong one: every session would read
+both, and the rules budget assumes no session does.
+
+## The modules
 
 ### TypeScript
 
@@ -156,3 +176,24 @@ one is a promise nobody is keeping.
 A rule goes in the `rules/` of the section whose every project needs it, with its import in
 that section's `rules.md`. `./check 40` fails until both exist, and fails if the section's
 session load passes 225 lines.
+
+## Migrating from 1.x
+
+Every path changed in 2.0.0. Replace each 1.x line with its 2.0 counterpart:
+
+| 1.x | 2.0 |
+| --- | --- |
+| `@node_modules/dev-kit/rules/commits.md`, `documentation.md`, `writing.md`, `review.md`, `backlog.md` | `@node_modules/dev-kit/common/rules.md` |
+| `@node_modules/dev-kit/rules/typescript.md` | `common/rules.md`, plus `backend/rules.md` or `ui/rules.md` |
+| `@node_modules/dev-kit/rules/http.md`, `layout.md` | `@node_modules/dev-kit/backend/rules.md` |
+| `@node_modules/dev-kit/rules/testing.md` | `@node_modules/dev-kit/testing/rules.md`, plus `backend/rules.md` for the PostgreSQL rule |
+| `dev-kit/tsconfig/base` | `dev-kit/common/tsconfig` |
+| `dev-kit/tsconfig/node` | `dev-kit/backend/tsconfig` |
+| `dev-kit/tsconfig/web` | `dev-kit/ui/tsconfig` |
+| `dev-kit/prettier` | `dev-kit/common/prettier` |
+| `node_modules/dev-kit/sh/lib.sh` | `node_modules/dev-kit/common/lib.sh` — in the bootstrap line too |
+| `node_modules/dev-kit/ignore/…` | `node_modules/dev-kit/common/ignore/…` |
+
+A project that imported only some of the 1.x rules now gets the whole section. The rule files
+are still files at `<section>/rules/<rule>.md` and can be imported one at a time, but that is
+outside the documented contract and nothing checks it.
