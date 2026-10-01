@@ -15,16 +15,13 @@
     "common",
     "backend",
     "ui",
-    "rules",
-    "prettier",
-    "sh",
-    "ignore"
+    "rules"
   ],
   "exports": {
     "./package.json": "./package.json",
     "./common/tsconfig": "./common/tsconfig.json",
+    "./common/prettier": "./common/prettier.json",
     "./backend/tsconfig": "./backend/tsconfig.json",
-    "./ui/tsconfig": "./ui/tsconfig.json",
-    "./prettier": "./prettier/index.json"
+    "./ui/tsconfig": "./ui/tsconfig.json"
   }
 }
