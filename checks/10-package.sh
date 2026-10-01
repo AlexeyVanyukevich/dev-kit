@@ -33,7 +33,11 @@ stale="$(grep -rnE 'dev-kit/(tsconfig|prettier|rules|sh|ignore)([^a-z]|$)' \
 # would ship a second, stale copy of a rule.
 outside="$(grep -vE '^(common|backend|ui|testing)/|^package\.json$|^README\.md$' \
   <<< "$packed" || true)"
-[ -z "$outside" ] || { echo "  ✗ the package ships files outside the sections:"; echo "$outside"; exit 1; }
+[ -z "$outside" ] || {
+  echo "  ✗ the package ships files outside the sections:"
+  echo "$outside"
+  exit 1
+}
 
 # A consumer must be able to resolve the package by name. This is what every later module
 # rides on, so it is checked once here rather than in each of them.

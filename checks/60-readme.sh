@@ -4,6 +4,10 @@ set -euo pipefail
 
 [ -f README.md ] || { echo "  ✗ README.md does not exist"; exit 1; }
 
+# The migration section names 1.x paths on purpose, so it is the one part not checked. It is
+# the README's last section: everything from its heading down is dropped.
+promised="$(sed '/^## Migrating from 1\.x/,$d' README.md)"
+
 checked=0
 
 # Filesystem paths — rule imports, the shell library, the ignore files. Each never touches npm's
@@ -12,9 +16,10 @@ while read -r path; do
   rel="${path#node_modules/dev-kit/}"
   [ -f "$rel" ] || { echo "  ✗ README promises $path; $rel does not exist"; exit 1; }
   checked=$((checked + 1))
-done < <(grep -o 'node_modules/dev-kit/[^ )`"]*' README.md | sort -u)
+done < <(grep -o 'node_modules/dev-kit/[^ )`"]*' <<< "$promised" | sort -u)
 
 # Specifiers that go through module resolution must be in the exports map.
+specifier='dev-kit/\(common\|backend\|ui\)/\(tsconfig\|prettier\)[^ )`"]*'
 while read -r spec; do
   sub="./${spec#dev-kit/}"
   node -e "
@@ -27,7 +32,7 @@ while read -r spec; do
     }
   "
   checked=$((checked + 1))
-done < <(grep -o 'dev-kit/\(common\|backend\|ui\)/\(tsconfig\|prettier\)[^ )`"]*' README.md | sort -u)
+done < <(grep -o "$specifier" <<< "$promised" | sort -u)
 
 [ "$checked" -ge 8 ] || { echo "  ✗ only $checked paths checked; the README looks incomplete"; exit 1; }
 
