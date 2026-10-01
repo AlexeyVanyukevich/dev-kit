@@ -2,8 +2,8 @@
 # The library defines what it promises, and load_env_file keeps the documented precedence.
 set -euo pipefail
 
-lib="$PWD/sh/lib.sh"
-[ -f "$lib" ] || { echo "  ✗ sh/lib.sh does not exist"; exit 1; }
+lib="$PWD/common/lib.sh"
+[ -f "$lib" ] || { echo "  ✗ common/lib.sh does not exist"; exit 1; }
 
 # Sourcing must be inert: no shell options changed, no directory changed, nothing executed.
 # A library that runs on load cannot be sourced near the top of someone else's script.

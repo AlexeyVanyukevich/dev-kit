@@ -27,7 +27,7 @@ while read -r spec; do
     }
   "
   checked=$((checked + 1))
-done < <(grep -o 'dev-kit/\(common/\|backend/\|ui/\)\{0,1\}\(tsconfig\|prettier\)[^ )`"]*' README.md | sort -u)
+done < <(grep -o 'dev-kit/\(common\|backend\|ui\)/\(tsconfig\|prettier\)[^ )`"]*' README.md | sort -u)
 
 [ "$checked" -ge 8 ] || { echo "  ✗ only $checked paths checked; the README looks incomplete"; exit 1; }
 

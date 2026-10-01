@@ -24,6 +24,11 @@ while read -r file; do
   expect_packed "$file"
 done < <(find common backend ui testing -type f 2>/dev/null | sort)
 
+# A shipped file that still names a 1.x path sends a consumer somewhere that no longer exists.
+stale="$(grep -rnE 'dev-kit/(tsconfig|prettier|rules|sh|ignore)([^a-z]|$)' \
+  common backend ui testing 2>/dev/null || true)"
+[ -z "$stale" ] || { echo "  ✗ shipped files still name 1.x paths:"; echo "$stale"; exit 1; }
+
 # A consumer must be able to resolve the package by name. This is what every later module
 # rides on, so it is checked once here rather than in each of them.
 ( cd "$fixture" && npm install --silent --no-audit --no-fund )

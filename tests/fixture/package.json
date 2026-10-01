@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "description": "Not shipped. Proves the kit's contract by consuming it.",
-  "prettier": "dev-kit/prettier",
+  "prettier": "dev-kit/common/prettier",
   "dependencies": {
     "dev-kit": "file:../.."
   },

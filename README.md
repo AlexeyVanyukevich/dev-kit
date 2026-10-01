@@ -57,7 +57,7 @@ layout, and a shared base that guesses them is a base every project has to overr
 In the consuming project's `package.json`:
 
 ```json
-{ "prettier": "dev-kit/prettier" }
+{ "prettier": "dev-kit/common/prettier" }
 ```
 
 `semi: false`, `singleQuote: true`, `printWidth: 100`.
@@ -97,7 +97,7 @@ is why they appear in no `exports` map and why adding a rule needs no `package.j
 ### The `./run` skeleton
 
 ```bash
-source node_modules/dev-kit/sh/lib.sh
+source node_modules/dev-kit/common/lib.sh
 ```
 
 Defines `step`, `ok`, `note`, `die`, `load_env_file`, `need_docker`, `need_node`, `need_deps`
@@ -109,8 +109,8 @@ kit is there.** Keep a short bootstrap *above* the `source` line, and test for t
 than the directory: a checkout installed before it took the kit has `node_modules` without it.
 
 ```bash
-[ -f node_modules/dev-kit/sh/lib.sh ] || npm install
-source node_modules/dev-kit/sh/lib.sh
+[ -f node_modules/dev-kit/common/lib.sh ] || npm install
+source node_modules/dev-kit/common/lib.sh
 ```
 
 `need_node` reads `DEVKIT_NODE_MIN` (default `24`) and `DEVKIT_NODE_HINT`. `need_env` returns
@@ -123,8 +123,8 @@ The scenarios stay in each project. Only the frame is shared.
 ### Ignore files
 
 ```bash
-cp node_modules/dev-kit/ignore/gitignore .gitignore
-cp node_modules/dev-kit/ignore/prettierignore .prettierignore
+cp node_modules/dev-kit/common/ignore/gitignore .gitignore
+cp node_modules/dev-kit/common/ignore/prettierignore .prettierignore
 ```
 
 These are **copied, not referenced** — neither format has an import or extends mechanism. They

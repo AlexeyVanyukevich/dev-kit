@@ -1,6 +1,6 @@
 # Sourced by a project's ./run, never executed:
 #
-#   source node_modules/dev-kit/sh/lib.sh
+#   source node_modules/dev-kit/common/lib.sh
 #
 # Sourcing is inert. No shell options are set, no directory is changed and nothing runs — the
 # caller owns `set -euo pipefail` and its own `cd`, and a library that took either would
