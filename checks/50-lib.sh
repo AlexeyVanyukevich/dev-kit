@@ -12,7 +12,7 @@ before="$(set +o)"
 source "$lib"
 [ "$(set +o)" = "$before" ] || { echo "  ✗ sourcing lib.sh changed shell options"; exit 1; }
 
-for fn in step ok note die load_env_file need_docker need_node need_deps need_env; do
+for fn in step ok note die load_env_file need_docker need_node need_deps need_env with_github_token; do
   declare -F "$fn" >/dev/null || { echo "  ✗ lib.sh does not define $fn"; exit 1; }
 done
 
@@ -55,4 +55,52 @@ result="$(
 ( cd "$tmp" && source "$lib" && need_env ) >/dev/null ||
   { echo "  ✗ need_env returned non-zero when .env already existed"; exit 1; }
 
-echo "  ✓ lib.sh sources inertly, defines its surface, keeps env precedence, and reports a new .env"
+# with_github_token hands a token to one command and to nothing after it: GITHUB_TOKEN when the
+# environment has one, as CI does, otherwise the GitHub CLI's own login. Fakes stand in for gh
+# and npm, so nothing here reaches the network or a real credential.
+bin="$tmp/bin"
+mkdir -p "$bin"
+cat > "$bin/gh" <<'FAKE'
+#!/usr/bin/env bash
+[ "${FAKE_GH:-}" = consulted ] && { echo "gh was consulted" >&2; exit 3; }
+[ "${FAKE_GH:-}" = signed-in ] && [ "$*" = "auth token" ] && { echo gh-token; exit 0; }
+exit 1
+FAKE
+cat > "$bin/npm" <<'FAKE'
+#!/usr/bin/env bash
+echo "npm $* token=${GITHUB_TOKEN:-none}"
+FAKE
+chmod +x "$bin/gh" "$bin/npm"
+real_path="$PATH"
+
+result="$(source "$lib"; PATH="$bin:$real_path" FAKE_GH=consulted GITHUB_TOKEN=ci-token with_github_token printenv GITHUB_TOKEN)"
+[ "$result" = ci-token ] || { echo "  ✗ with_github_token did not pass GITHUB_TOKEN through: got '$result'"; exit 1; }
+
+result="$(source "$lib"; unset GITHUB_TOKEN; PATH="$bin:$real_path" FAKE_GH=signed-in with_github_token printenv GITHUB_TOKEN)"
+[ "$result" = gh-token ] || { echo "  ✗ with_github_token did not take the GitHub CLI's token: got '$result'"; exit 1; }
+
+result="$(source "$lib"; unset GITHUB_TOKEN; PATH="$bin:$real_path" FAKE_GH=signed-in with_github_token true; echo "${GITHUB_TOKEN:-unset}")"
+[ "$result" = unset ] || { echo "  ✗ with_github_token left the token in the caller's environment"; exit 1; }
+
+# No token anywhere is a stop with the command that fixes it, not a 401 from whatever ran next.
+mkdir -p "$tmp/empty"
+for case in "no gh:$tmp/empty" "gh signed out:$bin"; do
+  name="${case%%:*}"
+  dir="${case#*:}"
+  err="$( (source "$lib"; unset GITHUB_TOKEN; PATH="$dir" FAKE_GH='' with_github_token true) 2>&1 >/dev/null )" &&
+    { echo "  ✗ with_github_token succeeded with $name"; exit 1; }
+  grep -q 'gh auth login' <<< "$err" || { echo "  ✗ with $name, the failure does not say to run gh auth login"; exit 1; }
+done
+
+# need_deps asks for a token only when the project's .npmrc does; a project without private
+# packages never needs the GitHub CLI.
+mkdir -p "$tmp/private" "$tmp/public"
+printf '//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}\n' > "$tmp/private/.npmrc"
+result="$(cd "$tmp/private" && source "$lib" && unset GITHUB_TOKEN && PATH="$bin:$real_path" FAKE_GH=signed-in need_deps)"
+grep -q 'npm install token=gh-token' <<< "$result" ||
+  { echo "  ✗ need_deps did not install with the token its .npmrc asks for: got '$result'"; exit 1; }
+result="$(cd "$tmp/public" && source "$lib" && unset GITHUB_TOKEN && PATH="$bin:$real_path" FAKE_GH=consulted need_deps)"
+grep -q 'npm install token=none' <<< "$result" ||
+  { echo "  ✗ need_deps involved a token for a project that asks for none: got '$result'"; exit 1; }
+
+echo "  ✓ lib.sh sources inertly, defines its surface, keeps env precedence, reports a new .env, and hands a GitHub token only where one is asked for"
