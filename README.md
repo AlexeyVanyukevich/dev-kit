@@ -137,8 +137,8 @@ is why they appear in no `exports` map and why adding a rule needs no `package.j
 source node_modules/dev-kit/common/lib.sh
 ```
 
-Defines `step`, `ok`, `note`, `die`, `load_env_file`, `need_docker`, `need_node`, `need_deps`
-and `need_env`, plus the colour variables. Sourcing is inert: no shell options set, no
+Defines `step`, `ok`, `note`, `die`, `load_env_file`, `need_docker`, `need_node`, `need_deps`,
+`need_env` and `with_github_token`, plus the colour variables. Sourcing is inert: no shell options set, no
 directory changed, nothing run.
 
 **`./run` is what installs dependencies, so it cannot source out of `node_modules` before the
@@ -146,9 +146,14 @@ kit is there.** Keep a short bootstrap *above* the `source` line, and test for t
 than the directory: a checkout installed before it took the kit has `node_modules` without it.
 
 ```bash
-[ -f node_modules/dev-kit/common/lib.sh ] || npm install
+[ -f node_modules/dev-kit/common/lib.sh ] ||
+  GITHUB_TOKEN="${GITHUB_TOKEN:-$(gh auth token 2>/dev/null || true)}" npm install
 source node_modules/dev-kit/common/lib.sh
 ```
+
+The token in that line matters only to a project with packages on GitHub Packages, below, and
+is the one place its source is restated: `with_github_token` cannot be called before the kit is
+installed. Without a token, a project that needs one fails here with npm's `401`.
 
 `need_node` reads `DEVKIT_NODE_MIN` (default `24`) and `DEVKIT_NODE_HINT`. `need_env` returns
 non-zero when it created `.env`, so a caller can print its own notes only on the first run.
@@ -156,6 +161,33 @@ non-zero when it created `.env`, so a caller can print its own notes only on the
 `need_env || note "…"`.
 
 The scenarios stay in each project. Only the frame is shared.
+
+### Packages from GitHub Packages
+
+GitHub Packages wants a token even to install, public package or not. A project that depends on
+one says so in its `.npmrc`, and nowhere else:
+
+```
+@owner:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+```
+
+`need_deps` reads that file: when it mentions `GITHUB_TOKEN`, it installs through
+`with_github_token`, and otherwise exactly as before, so a project without such packages never
+needs the GitHub CLI. `with_github_token <command…>` runs one command with a token: the
+environment's `GITHUB_TOKEN` when there is one, as in GitHub Actions, otherwise the GitHub CLI's
+login, which keeps it in the system's credential store. The token is handed to that command
+only, never exported into the session.
+
+A developer signs in once per machine:
+
+```bash
+gh auth login
+gh auth refresh -s read:packages
+```
+
+In GitHub Actions the workflow's own `GITHUB_TOKEN` serves, given `permissions: packages: read`
+and, on the package, access granted to the consuming repository under "Manage Actions access".
 
 ### Ignore files
 

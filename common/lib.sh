@@ -69,8 +69,32 @@ need_node() {
   fi
 }
 
+# GitHub Packages wants a token even to install. CI provides one as GITHUB_TOKEN; a developer's
+# comes from the GitHub CLI's login, which keeps it in the system's credential store. Either way
+# it is handed to the one command that needs it and never exported into the caller's session.
+with_github_token() {
+  local token="${GITHUB_TOKEN:-}"
+  if [ -z "$token" ]; then
+    command -v gh >/dev/null 2>&1 ||
+      die "Installing needs a GitHub token, and the GitHub CLI is not installed." \
+        "Install it from https://cli.github.com, then: gh auth login && gh auth refresh -s read:packages"
+    token="$(gh auth token 2>/dev/null)" && [ -n "$token" ] ||
+      die "Installing needs a GitHub token, and the GitHub CLI is not signed in." \
+        "gh auth login && gh auth refresh -s read:packages"
+  fi
+  GITHUB_TOKEN="$token" "$@"
+}
+
+# A project whose .npmrc reads ${GITHUB_TOKEN} installs from GitHub Packages and gets a token.
+# One that does not never needs the GitHub CLI.
 need_deps() {
-  [ -d node_modules ] || { step "Installing dependencies"; npm install; }
+  [ -d node_modules ] && return 0
+  step "Installing dependencies"
+  if grep -qs 'GITHUB_TOKEN' .npmrc; then
+    with_github_token npm install
+  else
+    npm install
+  fi
 }
 
 # Copies the template and says so. Whatever else the project wants to tell the reader about the
