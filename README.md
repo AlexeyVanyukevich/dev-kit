@@ -220,6 +220,22 @@ A rule goes in the `rules/` of the section whose every project needs it, with it
 that section's `rules.md`. `./check 40` fails until both exist, and fails if the section's
 session load passes 225 lines.
 
+## Releasing
+
+A release is one `chore: release X.Y.Z` commit on `main` and the `vX.Y.Z` tag on it. The commit
+changes the version in three places and nothing else: `"version"` in `package.json`, and the
+`^X.Y.Z` range and the `#vX.Y.Z` pin under Install, above.
+
+**The README's pins move with every release, patch included.** A consumer copies the install
+line as written, and a pin left behind installs the previous release without anything failing.
+
+Pick the number by what a consumer has to do. Reworded rules or a fixed function: patch. A new
+rule, module or `lib.sh` function: minor. A path a consumer writes that moves or disappears:
+major, with a migration section like the one below.
+
+The GitHub release is titled `vX.Y.Z — <what changed>` and ends with an "Upgrading" section that
+says what a consumer has to change, or that nothing has to.
+
 ## Migrating from 1.x
 
 Every path changed in 2.0.0. Replace each 1.x line with its 2.0 counterpart:
