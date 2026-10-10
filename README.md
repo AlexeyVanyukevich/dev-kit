@@ -108,7 +108,7 @@ project needs:
 | Section | Rule | Covers |
 | ------- | ---- | ------ |
 | common | `typescript.md` | Compiler strictness, no `any` in hand-written code |
-| common | `commits.md` | Conventional Commits, the subject line as the whole message, rebase-only merges |
+| common | `commits.md` | Conventional Commits, the subject line as the whole message, rebase-only merges, release commits |
 | common | `documentation.md` | `architecture.md` is authoritative; specs and plans are dated records |
 | common | `writing.md` | Refer to projects by role; name something only when the name is load-bearing |
 | common | `review.md` | A session ends by showing everything it changed, and what it decided alone |
